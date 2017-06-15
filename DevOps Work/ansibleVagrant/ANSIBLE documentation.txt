@@ -1,0 +1,41 @@
+ANSIBLE --
+
+1. create another directory- mkdir ansibleVagrant
+2. Create empty Vagrantfile and put followinr -
+	Vagrant.configure(2) do |config|
+	  config.vm.define "webserver" do |webserver|
+	    webserver.vm.box = "ubuntu/trusty64"
+	    webserver.vm.network "private_network", ip: "192.168.0.2"
+	    webserver.vm.hostname = "webserver"
+	  end
+	  config.vm.define "ansible" do |ansible|
+	    ansible.vm.box = "ubuntu/trusty64"
+	    ansible.vm.network "private_network", ip: "192.168.0.254"
+	    ansible.vm.hostname = "ansible"
+	  end
+	end
+
+3. vagrant up ansible
+4. vagrant up webserver
+5. vagrant ssh ansible
+	in the ansible machine - sudo apt-get install ansible
+
+6. now you have generate the SSH key generation in ansible so -
+	ssh-keygen (dont give any file / passphrase)
+7. the private key will be in - /home/vagrant/.ssh/id_rsa
+	public key will be in - /home/vagrant/.ssh/id_rsa.pub
+
+8. GOTO webserver 
+	1. do sudo -s (login as root)
+	2. goto /root/.ssh/authorized_keys - and paste the contents of ansible's public key 
+
+9. SET UP ANSIBLE INVENTORY  (goto ansible)
+	1. echo  '[webservers]' > hosts
+	2. echo '10.10.10.3' >> hosts
+
+10. ssh-agent sends our id_rsa key automatically so that we dont have to set it as argument all the time in command
+	Add the ssh agents in our ansibles hosts and generate them -
+		1. ssh-agent bash
+		2. ssh-add /home/vagrant/.ssh/id_rsa
+11. to ping all the tests from ansible to checkk if servers are reachable
+	ansible -i hosts -u root -m ping all
